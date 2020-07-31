@@ -11,7 +11,8 @@ using namespace std;
  *  @param config_json json including configuration parameters
  *  @return ODRIVE_OK on success
  *
- */
+ */ 
+//Don't think I need this if odrives are already configured
 int updateTargetConfig(odrive_endpoint *endpoint, Json::Value odrive_json, string config_file)
 {
     ifstream cfg;
@@ -184,6 +185,19 @@ int calibrateAxis1(odrive_endpoint *endpoint, Json::Value odrive_json)
 
     execOdriveFunc(endpoint, odrive_json, string("save_configuration"));
 }
+
+
+/***
+
+Don't think I need any of the stuff above
+
+
+
+***/
+
+
+
+
 
 /**
  *
