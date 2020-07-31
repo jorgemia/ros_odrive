@@ -6,6 +6,7 @@ Json::Value odrive_json;
 bool targetJsonValid = false;
 odrive_endpoint *endpoint = NULL;
 
+//This is the callback of the subscriber - instead of subscribing need to 
 void msgCallback(const ros_odrive::odrive_ctrl::ConstPtr& msg)
 {
     std::string cmd;
@@ -13,54 +14,25 @@ void msgCallback(const ros_odrive::odrive_ctrl::ConstPtr& msg)
     uint16_t u16val;
     float fval;
 
+    //If msg received contains axis = 0 set command to axis0
     if (msg->axis == 0) {
         cmd = "axis0";
     }
     else if (msg->axis == 1){
         cmd = "axis1";
     }
-    else {
-        ROS_ERROR("Invalid axis value in message!");
-	return;
-    }
-
+    
+	//if command in msg is 3 - set velocity
     switch (msg->command) {
-        case (CMD_AXIS_RESET):
-	    // Reset errors
-            u16val = u8val = 0;
-	    writeOdriveData(endpoint, odrive_json,
-                    cmd.append(".motor.error"), u16val);
-            writeOdriveData(endpoint, odrive_json,
-                    cmd.append(".encoder.error"), u8val);
-            writeOdriveData(endpoint, odrive_json,
-                    cmd.append(".controller.error"), u8val);
-	    writeOdriveData(endpoint, odrive_json,
-                    cmd.append(".error"), u16val);
-	    break;
-	case (CMD_AXIS_IDLE):
-	    // Set channel to Idle
-            u8val = AXIS_STATE_IDLE;
-            writeOdriveData(endpoint, odrive_json,
-                    cmd.append(".requested_state"), u8val);
-	    break;
-	case (CMD_AXIS_CLOSED_LOOP):
-            // Enable Closed Loop Control
-            u8val = AXIS_STATE_CLOSED_LOOP_CONTROL;
-            writeOdriveData(endpoint, odrive_json,
-                    cmd.append(".requested_state"), u8val);
-	    break;
+  	//deleted other options
 	case (CMD_AXIS_SET_VELOCITY):
-	    // Set velocity
+	    // Set velocity from fval msg
 	    fval = msg->fval;
+	   // Write data to axis0.controller.vel_setpoint fval is in encoder counts/s
             writeOdriveData(endpoint, odrive_json,
                     cmd.append(".controller.vel_setpoint"), fval);
 	    break;
-	case (CMD_REBOOT):
-	    execOdriveFunc(endpoint, odrive_json, string("reboot"));
-	    break;
-	default:
-	    ROS_ERROR("Invalid command type in message!");
-	    return;
+	
     }
 }
 
@@ -155,6 +127,8 @@ int main(int argc, char **argv)
         ROS_ERROR("Failed to get sn parameter %s!", od_sn.c_str());
         return 1;
     }
+	
+    //Will not need this	
     ros::Publisher odrive_pub = nh.advertise<ros_odrive::odrive_msg>("odrive_msg_" + od_sn, 100);
     ros::Subscriber odrive_sub = nh.subscribe("odrive_ctrl_" + od_sn, 10, msgCallback);
 
@@ -174,7 +148,7 @@ int main(int argc, char **argv)
     }
     targetJsonValid = true;
 
-    // Process configuration file
+    // Process configuration file - can get rid of this!
     if (nh.searchParam("od_cfg", od_cfg)) {
         nh.getParam("od_cfg", od_cfg);
         ROS_INFO("Using configuration file: %s", od_cfg.c_str());
@@ -185,7 +159,7 @@ int main(int argc, char **argv)
     // Example loop - reading values and updating motor velocity
     ROS_INFO("Starting idle loop");
     while (ros::ok()) {
-        // Publish status message
+        // Publish status message - need to remove this
 	publishMessage(odrive_pub);
 
 	// update watchdog
