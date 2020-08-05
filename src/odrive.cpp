@@ -1,6 +1,8 @@
 include "ros_odrive/odrive.hpp"
 
-using namespace std;
+//using namespace std;
+//check if need to declare std stuff if using namespace odrive
+using namespace odrive; //added stuff to odrive.hpp with this namespace
 
 Json::Value odrive_json; //define odrive_json type to json
 bool targetJsonValid = false;
@@ -34,7 +36,7 @@ ODriveDriver::ODriveDriver(const std::string* odrive_serial_numbers,
         motor_index_map_[i] = motor_index_map[i];
     }
 
-    //OR CAN I JUST USE THIS???
+    //Define if its odrive 0 or 1 -  
     uint8_t motor_to_odrive_map[4] = {0, 0, 1, 1};
 
 }
@@ -80,7 +82,8 @@ int ODriveDriver::init() {
             return 1;
         }
 
-        // Read JSON from target
+        // Read JSON from target - How to save odrive_json 1 and 2 - reading and saving separate odrive_json for each target will be a better solution.
+        //getJson(endpoint, address of jsonvalue odrive_json)
         if (getJson(endpoint[i], &odrive_json)) {
             return 1;
         }
@@ -173,4 +176,3 @@ int ODriveDriver::checkErrors(uint8_t* error_codes_array) {
     }
     return ODRIVE_SDK_COMM_SUCCESS;
 }***/
-
